@@ -107,4 +107,49 @@ func (app *application) routes() http.Handler {
 }
 ```
 
-###
+### Adding route handler
+
+```go
+package main
+
+import (
+	"net/http"
+
+	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
+)
+
+func (app *application) routes() http.Handler {
+	// create new router
+	mux := chi.NewRouter()
+	// middlewares
+	mux.Use(middleware.Recoverer)
+	// routes
+	mux.Get("/", app.Home)
+
+	return mux
+}
+```
+
+### Returning JSON from API
+
+```go
+	var payload = struct {
+		Status string `json:"status"`
+		Message string `json:"message"`
+		Version string `json:"version"`
+	}{
+		Status: "active",
+		Message: "Go Movies up and running",
+		Version: "1.0.0",
+	}
+
+	out, err := json.Marshal(payload)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(out)
+```
