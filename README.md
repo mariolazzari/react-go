@@ -153,3 +153,9 @@ func (app *application) routes() http.Handler {
 	w.WriteHeader(http.StatusOK)
 	w.Write(out)
 ```
+
+### Returning list of movies in JSON
+
+```go
+
+```

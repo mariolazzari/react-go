@@ -12,7 +12,7 @@ function App() {
   const logOut = () => {
     setJwtToken("");
     navigate("/login");
-  }
+  };
 
   return (
     <div className="container">
