@@ -157,5 +157,85 @@ func (app *application) routes() http.Handler {
 ### Returning list of movies in JSON
 
 ```go
+func (app *application) GetAllMovies(w http.ResponseWriter, r *http.Request) {
+	var movies []models.Movie
+
+	rd, _ := time.Parse("2020-01-01", "2020-03-28")
+	movie := models.Movie{
+		ID:          1,
+		Title:       "titolo",
+		ReleaseDate: rd,
+		MPAARating:  "R",
+		RunTime:     111,
+		Description: "movie description",
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now()}
+
+	movies = append(movies, movie)
+	movies = append(movies, movie)
+
+	out, err := json.Marshal(movies)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(out)
+}
+```
+
+### Enabling CORS
+
+```go
+package main
+
+import "net/http"
+
+func (app *application) enableCORS(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "http://*")
+
+		if r.Method == "OPTIONS" {
+			w.Header().Set("Access-Control-Allow-Credentials", "true")
+			w.Header().Set("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS")
+			w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, X-CSRF-Token, Authorization")
+			return
+		} else {
+			h.ServeHTTP(w, r)
+		}
+	})
+}
+```
+
+## Connecting to Postgres
+
+### Docker setup
+
+```yaml
+version: "3"
+
+services:
+  postgres:
+    image: "postgres:14.5"
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: movies
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+      - ./sql/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
+```
+
+### Connecting API to Postgres
+
+```go
 
 ```
