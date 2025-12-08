@@ -236,6 +236,12 @@ services:
 
 ### Connecting API to Postgres
 
+[pgx](https://github.com/jackc/pgx)
+
+```sh
+go get github.com/jackc/pgx/v5
+```
+
 ```go
 
 ```
