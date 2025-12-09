@@ -353,3 +353,72 @@ func (m *PostgresDBRepo) AllMovies() ([]*models.Movie, error) {
 	return movies, nil
 }
 ```
+
+```go
+package main
+
+import (
+	"backend/internal/repository"
+	"backend/internal/repository/dbrepo"
+	"flag"
+	"fmt"
+	"log"
+	"net/http"
+)
+
+const port = 8080
+
+type application struct {
+	DSN    string
+	Domain string
+	DB     repository.DatabaseRepo
+}
+
+func main() {
+	// set application config
+	var app application
+
+	// read from command line
+	flag.StringVar(&app.DSN, "dsn", "host=localhost port=5432 user=postgres password=postgres dbname=movies sslmode=disable timezone=UTC connect_timeout=5", "Postgres connection string")
+	flag.Parse()
+
+	// connect to the database
+	conn, err := app.connectToDB()
+	if err != nil {
+		log.Fatal(err)
+	}
+	app.DB = &dbrepo.PostgresDBRepo{DB: conn}
+	defer app.DB.Connection().Close()
+
+	app.Domain = "example.com"
+
+	log.Println("Starting application on port", port)
+
+	// start a web server
+	err = http.ListenAndServe(fmt.Sprintf(":%d", port), app.routes())
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+```
+
+### allMovies handler
+
+```go
+func (app *application) AllMovies(w http.ResponseWriter, r *http.Request) {
+	movies, err := app.DB.AllMovies()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	out, err := json.Marshal(movies)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(out)
+}
+```
