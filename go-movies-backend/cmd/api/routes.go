@@ -3,20 +3,20 @@ package main
 import (
 	"net/http"
 
-	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 func (app *application) routes() http.Handler {
-	// create new router
+	// create a router mux
 	mux := chi.NewRouter()
-	// middlewares
+
 	mux.Use(middleware.Recoverer)
 	mux.Use(app.enableCORS)
 
-	// routes
 	mux.Get("/", app.Home)
-	mux.Get("/movies", app.GetAllMovies)
+
+	mux.Get("/movies", app.AllMovies)
 
 	return mux
 }

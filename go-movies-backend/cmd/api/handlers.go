@@ -10,11 +10,11 @@ import (
 
 func (app *application) Home(w http.ResponseWriter, r *http.Request) {
 	var payload = struct {
-		Status  string `json:"status"`
+		Status string `json:"status"`
 		Message string `json:"message"`
 		Version string `json:"version"`
 	}{
-		Status:  "active",
+		Status: "active",
 		Message: "Go Movies up and running",
 		Version: "1.0.0",
 	}
@@ -29,22 +29,38 @@ func (app *application) Home(w http.ResponseWriter, r *http.Request) {
 	w.Write(out)
 }
 
-func (app *application) GetAllMovies(w http.ResponseWriter, r *http.Request) {
+func (app *application) AllMovies(w http.ResponseWriter, r *http.Request) {
 	var movies []models.Movie
 
-	rd, _ := time.Parse("2020-01-01", "2020-03-28")
-	movie := models.Movie{
-		ID:          1,
-		Title:       "titolo",
-		ReleaseDate: rd,
-		MPAARating:  "R",
-		RunTime:     111,
-		Description: "movie description",
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now()}
+	rd, _ := time.Parse("2006-01-02", "1986-03-07")
 
-	movies = append(movies, movie)
-	movies = append(movies, movie)
+	highlander := models.Movie {
+		ID: 1,
+		Title: "Highlander",
+		ReleaseDate: rd,
+		MPAARating: "R",
+		RunTime: 116,
+		Description: "A very nice movie",
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+
+	movies = append(movies, highlander)
+
+	rd, _ = time.Parse("2006-01-02", "1981-06-12")
+
+	rotla := models.Movie {
+		ID: 2,
+		Title: "Raiders of the Lost Ark",
+		ReleaseDate: rd,
+		MPAARating: "PG-13",
+		RunTime: 115,
+		Description: "Another very nice movie",
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+
+	movies = append(movies, rotla)
 
 	out, err := json.Marshal(movies)
 	if err != nil {
@@ -54,5 +70,4 @@ func (app *application) GetAllMovies(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(out)
-
 }

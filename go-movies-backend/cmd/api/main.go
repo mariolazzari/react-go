@@ -11,29 +11,33 @@ import (
 const port = 8080
 
 type application struct {
-	DB     *sql.DB
-	DSN    string
+	DSN string
 	Domain string
+	DB *sql.DB
 }
 
 func main() {
-	// app config
+	// set application config
 	var app application
-	// command ling args
-	flag.StringVar(&app.DSN, "dsn", "host=localhost port=5432 user=mario password=password dbname=movies sslmode=disable timezone=UTC connect_timeout=5", "Postgres connection string")
+
+	// read from command line
+	flag.StringVar(&app.DSN, "dsn", "host=localhost port=5432 user=postgres password=postgres dbname=movies sslmode=disable timezone=UTC connect_timeout=5", "Postgres connection string")
 	flag.Parse()
 
-	// connct db
+	// connect to the database
 	conn, err := app.connectToDB()
 	if err != nil {
 		log.Fatal(err)
 	}
 	app.DB = conn
+	defer app.DB.Close()
 
 	app.Domain = "example.com"
 
 	log.Println("Starting application on port", port)
-	// start web server
+
+
+	// start a web server
 	err = http.ListenAndServe(fmt.Sprintf(":%d", port), app.routes())
 	if err != nil {
 		log.Fatal(err)

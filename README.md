@@ -243,5 +243,113 @@ go get github.com/jackc/pgx/v5
 ```
 
 ```go
+package main
 
+import (
+	"database/sql"
+	"log"
+
+	_ "github.com/jackc/pgconn"
+	_ "github.com/jackc/pgx/v4"
+	_ "github.com/jackc/pgx/v4/stdlib"
+)
+
+func openDB(dsn string) (*sql.DB, error) {
+	db, err := sql.Open("pgx", dsn)
+	if err != nil {
+		return nil, err
+	}
+
+	err = db.Ping()
+	if err != nil {
+		return nil, err
+	}
+
+	return db, nil
+}
+
+func (app *application) connectToDB() (*sql.DB, error) {
+	connection, err := openDB(app.DSN)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Println("Connected to Postgres!")
+	return connection, nil
+}
+```
+
+### Repository database
+
+```go
+package repository
+
+import "backend/internal/models"
+
+type DatabaseRepo interface {
+	AllMovies() ([]*models.Movie, error)
+}
+```
+
+```go
+package dbrepo
+
+import (
+	"backend/internal/models"
+	"context"
+	"database/sql"
+	"time"
+)
+
+type PostgresDBRepo struct {
+	DB *sql.DB
+}
+
+const dbTimeout = time.Second * 3
+
+func (m *PostgresDBRepo) AllMovies() ([]*models.Movie, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
+	defer cancel()
+
+	query := `
+		select
+			id, title, release_date, runtime,
+			mpaa_rating, description, coalesce(image, ''),
+			created_at, updated_at
+		from
+			movies
+		order by
+			title
+	`
+
+	rows, err := m.DB.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var movies []*models.Movie
+
+	for rows.Next() {
+		var movie models.Movie
+		err := rows.Scan(
+			&movie.ID,
+			&movie.Title,
+			&movie.ReleaseDate,
+			&movie.RunTime,
+			&movie.MPAARating,
+			&movie.Description,
+			&movie.Image,
+			&movie.CreatedAt,
+			&movie.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		movies = append(movies, &movie)
+	}
+
+	return movies, nil
+}
 ```
