@@ -4,14 +4,12 @@ import (
 	"net/http"
 )
 
-type homePayload struct {
-	Status  string `json:"status"`
-	Message string `json:"message"`
-	Version string `json:"version"`
-}
-
 func (app *application) Home(w http.ResponseWriter, r *http.Request) {
-	var payload = homePayload{
+	var payload = struct {
+		Status  string `json:"status"`
+		Message string `json:"message"`
+		Version string `json:"version"`
+	}{
 		Status:  "active",
 		Message: "Go Movies up and running",
 		Version: "1.0.0",

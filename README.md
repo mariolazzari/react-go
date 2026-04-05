@@ -422,3 +422,13 @@ func (app *application) AllMovies(w http.ResponseWriter, r *http.Request) {
 	w.Write(out)
 }
 ```
+
+## JWT
+
+### Installing package
+
+[jwt](https://github.com/golang-jwt/jwt)
+
+```sh
+go get -u github.com/golang-jwt/jwt/v5
+```
