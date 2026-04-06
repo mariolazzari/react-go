@@ -71,8 +71,8 @@ func (j *Auth) GenerateTokenPair(user *jwtUser) (TokenPairs, error) {
 	}
 
 	// Create TokenPairs and populate with signed tokens
-	var tokenPairs = TokenPairs{
-		Token:        signedAccessToken,
+	var tokenPairs = TokenPairs {
+		Token: signedAccessToken,
 		RefreshToken: signedRefreshToken,
 	}
 
