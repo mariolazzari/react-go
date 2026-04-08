@@ -32,7 +32,7 @@ func (app *application) AllMovies(w http.ResponseWriter, r *http.Request) {
 func (app *application) authenticate(w http.ResponseWriter, r *http.Request) {
 	// read json payload
 	var requestPayload struct {
-		Email string `json:"email"`
+		Email    string `json:"email"`
 		Password string `json:"password"`
 	}
 
@@ -47,10 +47,10 @@ func (app *application) authenticate(w http.ResponseWriter, r *http.Request) {
 	// check password
 
 	// create a jwt user
-	u := jwtUser {
-		ID: 1,
+	u := jwtUser{
+		ID:        1,
 		FirstName: "Admin",
-		LastName: "User",
+		LastName:  "User",
 	}
 
 	// generate tokens
