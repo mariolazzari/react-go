@@ -8,15 +8,19 @@ const Movies = () => {
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
 
-    const fetchOptions = {
+    const requestOptions = {
       method: "GET",
-      headers,
+      headers: headers,
     };
 
-    fetch("http://localhost:8080/movies", fetchOptions)
-      .then(res => res.json())
-      .then(data => setMovies(data))
-      .catch(ex => console.error(ex));
+    fetch(`http://localhost:8080/movies`, requestOptions)
+      .then(response => response.json())
+      .then(data => {
+        setMovies(data);
+      })
+      .catch(err => {
+        console.log(err);
+      });
   }, []);
 
   return (
