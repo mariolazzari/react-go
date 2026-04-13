@@ -204,6 +204,7 @@ func (m *PostgresDBRepo) OneMovieForEdit(id int) (*models.Movie, []*models.Genre
 		allGenres = append(allGenres, &g)
 	}
 
+
 	return &movie, allGenres, err
 }
 
