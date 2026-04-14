@@ -5,7 +5,6 @@ import (
 	"database/sql"
 )
 
-
 type DatabaseRepo interface {
 	Connection() *sql.DB
 	AllMovies() ([]*models.Movie, error)
@@ -16,4 +15,6 @@ type DatabaseRepo interface {
 	OneMovie(id int) (*models.Movie, error)
 	AllGenres() ([]*models.Genre, error)
 	InsertMovie(movie models.Movie) (int, error)
+	UpdateMovieGenres(id int, genreIDs []int) error
+	UpdateMovie(movie models.Movie) error
 }

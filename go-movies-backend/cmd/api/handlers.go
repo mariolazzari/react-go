@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/golang-jwt/jwt/v4"
@@ -211,11 +212,26 @@ func (app *application) InsertMovie(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// try to get an image
+	movie = app.getPoster(movie)
+
+	movie.CreatedAt = time.Now()
+	movie.UpdatedAt = time.Now()
+
+	newID, err := app.DB.InsertMovie(movie)
+	if err != nil {
+		app.errorJSON(w, err)
+		return
+	}
 
 	// now handle genres
+	err = app.DB.UpdateMovieGenres(newID, movie.GenresArray)
+	if err != nil {
+		app.errorJSON(w, err)
+		return
+	}
 
-	resp := JSONResponse {
-		Error: false,
+	resp := JSONResponse{
+		Error:   false,
 		Message: "movie updated",
 	}
 
@@ -224,7 +240,7 @@ func (app *application) InsertMovie(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) getPoster(movie models.Movie) models.Movie {
 	type TheMovieDB struct {
-		Page int `json:"page"`
+		Page    int `json:"page"`
 		Results []struct {
 			PosterPath string `json:"poster_path"`
 		} `json:"results"`
@@ -233,6 +249,8 @@ func (app *application) getPoster(movie models.Movie) models.Movie {
 
 	client := &http.Client{}
 	theUrl := fmt.Sprintf("https://api.themoviedb.org/3/search/movie?api_key=%s", app.APIKey)
+
+	// https://api.themoviedb.org/3/search/movie?api_key=b41447e6319d1cd467306735632ba733&query=Die+Hard
 
 	req, err := http.NewRequest("GET", theUrl+"&query="+url.QueryEscape(movie.Title), nil)
 	if err != nil {

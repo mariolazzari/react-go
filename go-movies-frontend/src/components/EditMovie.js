@@ -90,6 +90,47 @@ const EditMovie = () => {
         });
     } else {
       // editing an existing movie
+      const headers = new Headers();
+      headers.append("Content-Type", "application/json");
+      headers.append("Authorization", "Bearer " + jwtToken);
+
+      const requestOptions = {
+        method: "GET",
+        headers: headers,
+      };
+
+      fetch(`/admin/movies/${id}`, requestOptions)
+        .then(response => {
+          if (response.status !== 200) {
+            setError("Invalid response code: " + response.status);
+          }
+          return response.json();
+        })
+        .then(data => {
+          // fix release date
+          data.movie.release_date = new Date(data.movie.release_date)
+            .toISOString()
+            .split("T")[0];
+
+          const checks = [];
+
+          data.genres.forEach(g => {
+            if (data.movie.genres_array.indexOf(g.id) !== -1) {
+              checks.push({ id: g.id, checked: true, genre: g.genre });
+            } else {
+              checks.push({ id: g.id, checked: false, genre: g.genre });
+            }
+          });
+
+          // set state
+          setMovie({
+            ...data.movie,
+            genres: checks,
+          });
+        })
+        .catch(err => {
+          console.log(err);
+        });
     }
   }, [id, jwtToken, navigate]);
 
@@ -126,6 +167,45 @@ const EditMovie = () => {
     if (errors.length > 0) {
       return false;
     }
+
+    // passed validation, so save changes
+    const headers = new Headers();
+    headers.append("Content-Type", "application/json");
+    headers.append("Authorization", "Bearer " + jwtToken);
+
+    // assume we are adding a new movie
+    let method = "PUT";
+
+    if (movie.id > 0) {
+      method = "PATCH";
+    }
+
+    const requestBody = movie;
+    // we need to covert the values in JSON for release date (to date)
+    // and for runtime to int
+
+    requestBody.release_date = new Date(movie.release_date);
+    requestBody.runtime = parseInt(movie.runtime, 10);
+
+    let requestOptions = {
+      body: JSON.stringify(requestBody),
+      method: method,
+      headers: headers,
+      credentials: "include",
+    };
+
+    fetch(`/admin/movies/${movie.id}`, requestOptions)
+      .then(response => response.json())
+      .then(data => {
+        if (data.error) {
+          console.log(data.error);
+        } else {
+          navigate("/manage-catalogue");
+        }
+      })
+      .catch(err => {
+        console.log(err);
+      });
   };
 
   const handleChange = () => event => {
@@ -205,6 +285,7 @@ const EditMovie = () => {
           title={"MPAA Rating"}
           name={"mpaa_rating"}
           options={mpaaOptions}
+          value={movie.mpaa_rating}
           onChange={handleChange("mpaa_rating")}
           placeHolder={"Choose..."}
           errorMsg={"Please choose"}
